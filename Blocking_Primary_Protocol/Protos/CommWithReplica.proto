@@ -6,9 +6,9 @@ message Address{
 }
 
 service CommWithServer{
-    rpc SendDetailsToPR(Address) returns (SendDetailsToPRResponse) {}
+    rpc SendDetailsOfPR(Address) returns (SendDetailsOfPRResponse) {}
 }
 
-message SendDetailsToPRResponse{
+message SendDetailsOfPRResponse{
     string Status = 1;
 }

@@ -37,6 +37,11 @@ class CommWithRegistryReplicaservicer(CommWithRegistryServer_pb2_grpc.CommWithRe
         name = 'replica_' + str(nextcount)
         result = addReplicas(name, request.address.IP, request.address.port)
         if result == 0:
+            # We need to create a thread to send details of replica to PR
+            if request.address.IP != PR_details["IP"] and request.address.port != PR_details["port"]:
+                # Here we will create a thread for sending the details
+                pass
+
             return CommWithRegistryServer_pb2.RegisterResponse(status="SUCCESS", primaryServerAddress=CommWithRegistryServer_pb2.Address(IP=PR_details['IP'],Port=PR_details['port']))
         else:
             return CommWithRegistryServer_pb2.RegisterResponse(status="FAIL", primaryServerAddress=None)

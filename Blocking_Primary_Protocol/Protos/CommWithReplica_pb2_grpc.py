@@ -14,17 +14,17 @@ class CommWithServerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendDetailsToPR = channel.unary_unary(
-                '/CommWithServer/SendDetailsToPR',
+        self.SendDetailsOfPR = channel.unary_unary(
+                '/CommWithServer/SendDetailsOfPR',
                 request_serializer=CommWithReplica__pb2.Address.SerializeToString,
-                response_deserializer=CommWithReplica__pb2.SendDetailsToPRResponse.FromString,
+                response_deserializer=CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
                 )
 
 
 class CommWithServerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def SendDetailsToPR(self, request, context):
+    def SendDetailsOfPR(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,10 +33,10 @@ class CommWithServerServicer(object):
 
 def add_CommWithServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendDetailsToPR': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendDetailsToPR,
+            'SendDetailsOfPR': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendDetailsOfPR,
                     request_deserializer=CommWithReplica__pb2.Address.FromString,
-                    response_serializer=CommWithReplica__pb2.SendDetailsToPRResponse.SerializeToString,
+                    response_serializer=CommWithReplica__pb2.SendDetailsOfPRResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -49,7 +49,7 @@ class CommWithServer(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SendDetailsToPR(request,
+    def SendDetailsOfPR(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class CommWithServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/CommWithServer/SendDetailsToPR',
+        return grpc.experimental.unary_unary(request, target, '/CommWithServer/SendDetailsOfPR',
             CommWithReplica__pb2.Address.SerializeToString,
-            CommWithReplica__pb2.SendDetailsToPRResponse.FromString,
+            CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

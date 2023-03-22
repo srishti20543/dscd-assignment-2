@@ -12,7 +12,7 @@ class Address(_message.Message):
     port: int
     def __init__(self, IP: _Optional[str] = ..., port: _Optional[int] = ...) -> None: ...
 
-class SendDetailsToPRResponse(_message.Message):
+class SendDetailsOfPRResponse(_message.Message):
     __slots__ = ["Status"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     Status: str
