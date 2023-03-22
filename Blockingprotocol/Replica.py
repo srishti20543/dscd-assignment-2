@@ -51,15 +51,6 @@ class CommWithServerServicer(CommWithServer_pb2_grpc.CommWithServerServicer):
             return CommWithServer_pb2.JoinServerResponse(status="FAIL")
 
 
-    def LeaveServer(self, request, context):
-        print("LEAVE REQUEST FROM " + request.uuid)
-        result = removeClient(request.uuid)
-        if result == 0:
-            return CommWithServer_pb2.JoinServerResponse(status="SUCCESS")
-        else:
-            return CommWithServer_pb2.JoinServerResponse(status="FAIL")
-
-
     def PublishArticles(self, request, context):
         for client in CLIENTELE.keys():
             if CLIENTELE[client][2] == request.uuid:
