@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message Address{
+    string IP = 1;
+    int32 port = 2;
+}
+
+service CommWithRegistryServer{
+    rpc Register(Address) returns (RegisterReplicaResponse) {}
+    rpc getReplicaList(Address) returns (stream ReplicaListResponse) {}
+}
+
+message RegisterReplicaResponse{
+    string status = 1;
+    Address primaryServerAddress = 2;
+}
+
+message ReplicaListResponse{
+    string name = 1;
+    Address replicaServer = 2;
+}

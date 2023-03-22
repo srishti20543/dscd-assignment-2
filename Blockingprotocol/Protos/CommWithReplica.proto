@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message Address{
+    string IP = 1;
+    int32 port = 2;
+}
+
+service CommWithServer{
+    rpc SendDetailsToPR(Address) returns (SendDetailsToPRResponse) {}
+}
+
+message SendDetailsToPRResponse{
+    string Status = 1;
+}
