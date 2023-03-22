@@ -1,9 +1,6 @@
 syntax = "proto3";
 
-message Address{
-    string IP = 1;
-    int32 port = 2;
-}
+import "CommWithReplica.proto";
 
 service CommWithRegistryServer{
     rpc Register(Address) returns (RegisterReplicaResponse) {}

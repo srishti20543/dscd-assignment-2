@@ -3,6 +3,7 @@
 import grpc
 
 import CommWithRegistryServer_pb2 as CommWithRegistryServer__pb2
+import CommWithReplica_pb2 as CommWithReplica__pb2
 
 
 class CommWithRegistryServerStub(object):
@@ -16,12 +17,12 @@ class CommWithRegistryServerStub(object):
         """
         self.Register = channel.unary_unary(
                 '/CommWithRegistryServer/Register',
-                request_serializer=CommWithRegistryServer__pb2.Address.SerializeToString,
+                request_serializer=CommWithReplica__pb2.Address.SerializeToString,
                 response_deserializer=CommWithRegistryServer__pb2.RegisterReplicaResponse.FromString,
                 )
         self.getReplicaList = channel.unary_stream(
                 '/CommWithRegistryServer/getReplicaList',
-                request_serializer=CommWithRegistryServer__pb2.Address.SerializeToString,
+                request_serializer=CommWithReplica__pb2.Address.SerializeToString,
                 response_deserializer=CommWithRegistryServer__pb2.ReplicaListResponse.FromString,
                 )
 
@@ -46,12 +47,12 @@ def add_CommWithRegistryServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Register': grpc.unary_unary_rpc_method_handler(
                     servicer.Register,
-                    request_deserializer=CommWithRegistryServer__pb2.Address.FromString,
+                    request_deserializer=CommWithReplica__pb2.Address.FromString,
                     response_serializer=CommWithRegistryServer__pb2.RegisterReplicaResponse.SerializeToString,
             ),
             'getReplicaList': grpc.unary_stream_rpc_method_handler(
                     servicer.getReplicaList,
-                    request_deserializer=CommWithRegistryServer__pb2.Address.FromString,
+                    request_deserializer=CommWithReplica__pb2.Address.FromString,
                     response_serializer=CommWithRegistryServer__pb2.ReplicaListResponse.SerializeToString,
             ),
     }
@@ -76,7 +77,7 @@ class CommWithRegistryServer(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommWithRegistryServer/Register',
-            CommWithRegistryServer__pb2.Address.SerializeToString,
+            CommWithReplica__pb2.Address.SerializeToString,
             CommWithRegistryServer__pb2.RegisterReplicaResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -93,7 +94,7 @@ class CommWithRegistryServer(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/CommWithRegistryServer/getReplicaList',
-            CommWithRegistryServer__pb2.Address.SerializeToString,
+            CommWithReplica__pb2.Address.SerializeToString,
             CommWithRegistryServer__pb2.ReplicaListResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

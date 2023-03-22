@@ -1,12 +1,15 @@
 import sys
-sys.path.insert(1, 'Proto')
+sys.path.insert(1, '../Protos')
 
 from concurrent import futures
 
 import CommWithRegistryServer_pb2_grpc
 import CommWithRegistryServer_pb2
+import CommWithReplica_pb2_grpc
+import CommWithReplica_pb2
 import logging
 import grpc
+import threading
 
 PR_details = {}
 Replicas = {}
@@ -28,8 +31,7 @@ def addReplicas(name, IP, port):
     return 0
 
 
-
-class CommWithRegistryReplicaservicer(CommWithRegistryServer_pb2_grpc.CommWithRegistryReplicaservicer):
+class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithRegistryServerServicer):
 
     def Register(self, request, context):
         print("JOIN REQUEST FROM " + request.address.IP + ":" + str(request.address.port))
@@ -37,10 +39,12 @@ class CommWithRegistryReplicaservicer(CommWithRegistryServer_pb2_grpc.CommWithRe
         name = 'replica_' + str(nextcount)
         result = addReplicas(name, request.address.IP, request.address.port)
         if result == 0:
-            # We need to create a thread to send details of replica to PR
-            if request.address.IP != PR_details["IP"] and request.address.port != PR_details["port"]:
-                # Here we will create a thread for sending the details
-                pass
+            # if request.address.IP != PR_details["IP"] and request.address.port != PR_details["port"]:
+            #     with grpc.insecure_channel('localhost:8888') as channel:
+            #         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+            #         request = CommWithReplica_pb2.Address(IP=request.address.IP, port=request.address.IP)
+            #         status = stub.SendDetailsOfPR(request)
+            #         print(status)
 
             return CommWithRegistryServer_pb2.RegisterResponse(status="SUCCESS", primaryServerAddress=CommWithRegistryServer_pb2.Address(IP=PR_details['IP'],Port=PR_details['port']))
         else:
@@ -55,9 +59,9 @@ class CommWithRegistryReplicaservicer(CommWithRegistryServer_pb2_grpc.CommWithRe
             yield CommWithRegistryServer_pb2.ReplicaListResponse(name=replica, address= CommWithRegistryServer_pb2.Address(IP=IP, port=port))
 
 
-def serve():
+def startRegistryServer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    CommWithRegistryServer_pb2_grpc.add_CommWithRegistryReplicaservicer_to_server(CommWithRegistryReplicaservicer(), server)
+    CommWithRegistryServer_pb2_grpc.add_CommWithRegistryServerServicer_to_server(CommWithRegistryServerServicer(), server)
     server.add_insecure_port('[::]:8888')
     server.start()
     server.wait_for_termination()
@@ -65,4 +69,4 @@ def serve():
 
 if __name__ == '__main__':
     logging.basicConfig()
-    serve()
+    startRegistryServer()
