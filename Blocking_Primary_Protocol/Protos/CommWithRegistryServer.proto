@@ -14,6 +14,5 @@ message RegisterReplicaResponse{
 }
 
 message ReplicaListResponse{
-    string name = 1;
-    Address replicaServer = 2;
+    Address replicaServer = 1;
 }

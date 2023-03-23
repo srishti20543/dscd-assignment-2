@@ -56,7 +56,7 @@ class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithReg
         for replica in Replicas.keys():
             IP = Replicas[replica][0]
             port = Replicas[replica][1]
-            yield CommWithRegistryServer_pb2.ReplicaListResponse(name=replica, address= CommWithReplica_pb2.Address(IP=IP, port=port))
+            yield CommWithRegistryServer_pb2.ReplicaListResponse(replicaServer= CommWithReplica_pb2.Address(name=replica, IP=IP, port=port))
 
 
 def startRegistryServer():

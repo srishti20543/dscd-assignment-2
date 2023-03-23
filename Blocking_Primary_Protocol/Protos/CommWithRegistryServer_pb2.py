@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 import CommWithReplica_pb2 as CommWithReplica__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x43ommWithRegistryServer.proto\x1a\x15\x43ommWithReplica.proto\"c\n\x17RegisterReplicaResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12&\n\x14primaryServerAddress\x18\x02 \x01(\x0b\x32\x08.Address\x12\x10\n\x08selfName\x18\x03 \x01(\t\"D\n\x13ReplicaListResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1f\n\rreplicaServer\x18\x02 \x01(\x0b\x32\x08.Address2\x80\x01\n\x16\x43ommWithRegistryServer\x12\x30\n\x08Register\x12\x08.Address\x1a\x18.RegisterReplicaResponse\"\x00\x12\x34\n\x0egetReplicaList\x12\x08.Address\x1a\x14.ReplicaListResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x43ommWithRegistryServer.proto\x1a\x15\x43ommWithReplica.proto\"c\n\x17RegisterReplicaResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12&\n\x14primaryServerAddress\x18\x02 \x01(\x0b\x32\x08.Address\x12\x10\n\x08selfName\x18\x03 \x01(\t\"6\n\x13ReplicaListResponse\x12\x1f\n\rreplicaServer\x18\x01 \x01(\x0b\x32\x08.Address2\x80\x01\n\x16\x43ommWithRegistryServer\x12\x30\n\x08Register\x12\x08.Address\x1a\x18.RegisterReplicaResponse\"\x00\x12\x34\n\x0egetReplicaList\x12\x08.Address\x1a\x14.ReplicaListResponse\"\x00\x30\x01\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'CommWithRegistryServer_pb2', globals())
@@ -24,7 +24,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _REGISTERREPLICARESPONSE._serialized_start=55
   _REGISTERREPLICARESPONSE._serialized_end=154
   _REPLICALISTRESPONSE._serialized_start=156
-  _REPLICALISTRESPONSE._serialized_end=224
-  _COMMWITHREGISTRYSERVER._serialized_start=227
-  _COMMWITHREGISTRYSERVER._serialized_end=355
+  _REPLICALISTRESPONSE._serialized_end=210
+  _COMMWITHREGISTRYSERVER._serialized_start=213
+  _COMMWITHREGISTRYSERVER._serialized_end=341
 # @@protoc_insertion_point(module_scope)
