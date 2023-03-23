@@ -1,8 +1,9 @@
 syntax = "proto3";
 
 message Address{
-    string IP = 1;
-    int32 port = 2;
+    string name = 1;
+    string IP = 2;
+    int32 port = 3;
 }
 
 service CommWithReplica{

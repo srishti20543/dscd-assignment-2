@@ -14,13 +14,9 @@ import grpc
 import logging
 import datetime
 
-Replicas = []
-
-def registerServer(stub, request):
-    status = stub.Register(request)
-    print(status)
-    if "SUCCESS" in str(status):
-        return 0
+PR_details = {}
+Replicas = {}
+selfName = ''
 
 
 class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
@@ -28,17 +24,28 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
     def SendDetailsOfPR(self, request, context):
         print("NEW BACK UP SERVER HAS JOINED")
         print(request)
-        if (request.IP, request.port) in Replicas:
+        if request.name in Replicas.keys():
             return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="FAIL")
-        Replicas.append((request.IP, request.port))
+        Replicas[request.name] = (request.IP, request.port)
         return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="SUCCESS")            
 
 def connectToRegistry(IP, port):
+    global selfName
+
     with grpc.insecure_channel('localhost:8888') as channel:
         stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
-        request = CommWithReplica_pb2.Address(IP=IP, port=port)
-        status = registerServer(stub, request)
-        return status
+        request = CommWithReplica_pb2.Address(IP=IP, port=port, name=None)
+        status = stub.Register(request)
+        if status.status == "SUCCESS":
+            selfName = status.selfName
+            PR_details['name'] = status.primaryServerAddress.name
+            PR_details['IP'] = status.primaryServerAddress.IP
+            PR_details['port'] = status.primaryServerAddress.port
+            print(selfName + " SUCCESSFULLY REGISTERED")
+            print("PR Details ", PR_details)
+        else:
+            print(status.status)
+
     
 def ConnectToReplica(IP, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

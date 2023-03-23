@@ -10,6 +10,7 @@ service CommWithRegistryServer{
 message RegisterReplicaResponse{
     string status = 1;
     Address primaryServerAddress = 2;
+    string selfName = 3;
 }
 
 message ReplicaListResponse{

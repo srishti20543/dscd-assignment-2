@@ -6,12 +6,14 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class RegisterReplicaResponse(_message.Message):
-    __slots__ = ["primaryServerAddress", "status"]
+    __slots__ = ["primaryServerAddress", "selfName", "status"]
     PRIMARYSERVERADDRESS_FIELD_NUMBER: _ClassVar[int]
+    SELFNAME_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     primaryServerAddress: _CommWithReplica_pb2.Address
+    selfName: str
     status: str
-    def __init__(self, status: _Optional[str] = ..., primaryServerAddress: _Optional[_Union[_CommWithReplica_pb2.Address, _Mapping]] = ...) -> None: ...
+    def __init__(self, status: _Optional[str] = ..., primaryServerAddress: _Optional[_Union[_CommWithReplica_pb2.Address, _Mapping]] = ..., selfName: _Optional[str] = ...) -> None: ...
 
 class ReplicaListResponse(_message.Message):
     __slots__ = ["name", "replicaServer"]

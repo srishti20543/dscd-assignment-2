@@ -18,6 +18,7 @@ Replicas = {}
 def addReplicas(name, IP, port):
 
     if name == 'replica_1':
+        PR_details['name'] = name
         PR_details['IP'] = IP
         PR_details['port'] = port
 
@@ -43,16 +44,15 @@ class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithReg
                 addr=PR_details["IP"]+":"+str(PR_details["port"])
                 with grpc.insecure_channel(addr) as channel:
                     stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-                    request = CommWithReplica_pb2.Address(IP=request.IP, port=request.port)
-                    status = stub.SendDetailsOfPR(request)
-                    print(status)
-            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="SUCCESS", primaryServerAddress=CommWithReplica_pb2.Address(IP=PR_details['IP'],port=PR_details['port']))
+                    request = CommWithReplica_pb2.Address(name=name, IP=request.IP, port=request.port)
+                    stub.SendDetailsOfPR(request)
+            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="SUCCESS", primaryServerAddress=CommWithReplica_pb2.Address(name=PR_details['name'], IP=PR_details['IP'], port=PR_details['port']), selfName=name)
         else:
-            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="FAIL", primaryServerAddress=None)
+            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="FAIL", primaryServerAddress=None, selfName=None)
 
 
     def getReplicaList(self, request, context):
-        print("REPLICA LIST REQUEST FROM " + request.address.IP + ":" + str(request.address.port))
+        print("REPLICA LIST REQUEST FROM " + request.IP + ":" + str(request.port))
         for replica in Replicas.keys():
             IP = Replicas[replica][0]
             port = Replicas[replica][1]
