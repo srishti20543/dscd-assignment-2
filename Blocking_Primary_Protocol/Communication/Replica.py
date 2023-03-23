@@ -23,14 +23,15 @@ def registerServer(stub, request):
         return 0
 
 
-class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithServerServicer):
+class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
     def SendDetailsOfPR(self, request, context):
         print("NEW BACK UP SERVER HAS JOINED")
+        print(request)
         if (request.IP, request.port) in Replicas:
             return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="FAIL")
         Replicas.append((request.IP, request.port))
-        return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="SUCCESS")              
+        return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="SUCCESS")            
 
 def connectToRegistry(IP, port):
     with grpc.insecure_channel('localhost:8888') as channel:
@@ -39,9 +40,9 @@ def connectToRegistry(IP, port):
         status = registerServer(stub, request)
         return status
     
-def SendDetailsForPR(IP, port):
+def ConnectToReplica(IP, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    CommWithReplica_pb2_grpc.add_CommWithRegistryReplicaservicer_to_server(CommWithReplicaServicer(), server)
+    CommWithReplica_pb2_grpc.add_CommWithReplicaServicer_to_server(CommWithReplicaServicer(), server)
     server.add_insecure_port('[::]:' + str(port))
     server.start()
     server.wait_for_termination()

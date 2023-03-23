@@ -5,7 +5,7 @@ message Address{
     int32 port = 2;
 }
 
-service CommWithServer{
+service CommWithReplica{
     rpc SendDetailsOfPR(Address) returns (SendDetailsOfPRResponse) {}
 }
 

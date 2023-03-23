@@ -34,21 +34,21 @@ def addReplicas(name, IP, port):
 class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithRegistryServerServicer):
 
     def Register(self, request, context):
-        print("JOIN REQUEST FROM " + request.address.IP + ":" + str(request.address.port))
+        print("JOIN REQUEST FROM " + request.IP + ":" + str(request.port))
         nextcount = len(Replicas) + 1
         name = 'replica_' + str(nextcount)
-        result = addReplicas(name, request.address.IP, request.address.port)
+        result = addReplicas(name, request.IP, request.port)
         if result == 0:
-            # if request.address.IP != PR_details["IP"] and request.address.port != PR_details["port"]:
-            #     with grpc.insecure_channel('localhost:8888') as channel:
-            #         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-            #         request = CommWithReplica_pb2.Address(IP=request.address.IP, port=request.address.IP)
-            #         status = stub.SendDetailsOfPR(request)
-            #         print(status)
-
-            return CommWithRegistryServer_pb2.RegisterResponse(status="SUCCESS", primaryServerAddress=CommWithRegistryServer_pb2.Address(IP=PR_details['IP'],Port=PR_details['port']))
+            if request.port != PR_details["port"]:
+                addr=PR_details["IP"]+":"+str(PR_details["port"])
+                with grpc.insecure_channel(addr) as channel:
+                    stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+                    request = CommWithReplica_pb2.Address(IP=request.IP, port=request.port)
+                    status = stub.SendDetailsOfPR(request)
+                    print(status)
+            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="SUCCESS", primaryServerAddress=CommWithReplica_pb2.Address(IP=PR_details['IP'],port=PR_details['port']))
         else:
-            return CommWithRegistryServer_pb2.RegisterResponse(status="FAIL", primaryServerAddress=None)
+            return CommWithRegistryServer_pb2.RegisterReplicaResponse(status="FAIL", primaryServerAddress=None)
 
 
     def getReplicaList(self, request, context):
@@ -56,7 +56,7 @@ class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithReg
         for replica in Replicas.keys():
             IP = Replicas[replica][0]
             port = Replicas[replica][1]
-            yield CommWithRegistryServer_pb2.ReplicaListResponse(name=replica, address= CommWithRegistryServer_pb2.Address(IP=IP, port=port))
+            yield CommWithRegistryServer_pb2.ReplicaListResponse(name=replica, address= CommWithReplica_pb2.Address(IP=IP, port=port))
 
 
 def startRegistryServer():
@@ -69,4 +69,3 @@ def startRegistryServer():
 
 if __name__ == '__main__':
     logging.basicConfig()
-    startRegistryServer()
