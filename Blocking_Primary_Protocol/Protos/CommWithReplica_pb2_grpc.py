@@ -19,12 +19,45 @@ class CommWithReplicaStub(object):
                 request_serializer=CommWithReplica__pb2.Address.SerializeToString,
                 response_deserializer=CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
                 )
+        self.Write = channel.unary_unary(
+                '/CommWithReplica/Write',
+                request_serializer=CommWithReplica__pb2.WriteRequest.SerializeToString,
+                response_deserializer=CommWithReplica__pb2.WriteResponse.FromString,
+                )
+        self.Read = channel.unary_unary(
+                '/CommWithReplica/Read',
+                request_serializer=CommWithReplica__pb2.ReadRequest.SerializeToString,
+                response_deserializer=CommWithReplica__pb2.ReadResponse.FromString,
+                )
+        self.Delete = channel.unary_unary(
+                '/CommWithReplica/Delete',
+                request_serializer=CommWithReplica__pb2.DeleteRequest.SerializeToString,
+                response_deserializer=CommWithReplica__pb2.DeleteResponse.FromString,
+                )
 
 
 class CommWithReplicaServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SendDetailsOfPR(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Write(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Read(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Delete(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +70,21 @@ def add_CommWithReplicaServicer_to_server(servicer, server):
                     servicer.SendDetailsOfPR,
                     request_deserializer=CommWithReplica__pb2.Address.FromString,
                     response_serializer=CommWithReplica__pb2.SendDetailsOfPRResponse.SerializeToString,
+            ),
+            'Write': grpc.unary_unary_rpc_method_handler(
+                    servicer.Write,
+                    request_deserializer=CommWithReplica__pb2.WriteRequest.FromString,
+                    response_serializer=CommWithReplica__pb2.WriteResponse.SerializeToString,
+            ),
+            'Read': grpc.unary_unary_rpc_method_handler(
+                    servicer.Read,
+                    request_deserializer=CommWithReplica__pb2.ReadRequest.FromString,
+                    response_serializer=CommWithReplica__pb2.ReadResponse.SerializeToString,
+            ),
+            'Delete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Delete,
+                    request_deserializer=CommWithReplica__pb2.DeleteRequest.FromString,
+                    response_serializer=CommWithReplica__pb2.DeleteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +110,56 @@ class CommWithReplica(object):
         return grpc.experimental.unary_unary(request, target, '/CommWithReplica/SendDetailsOfPR',
             CommWithReplica__pb2.Address.SerializeToString,
             CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Write(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/CommWithReplica/Write',
+            CommWithReplica__pb2.WriteRequest.SerializeToString,
+            CommWithReplica__pb2.WriteResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Read(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/CommWithReplica/Read',
+            CommWithReplica__pb2.ReadRequest.SerializeToString,
+            CommWithReplica__pb2.ReadResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Delete(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/CommWithReplica/Delete',
+            CommWithReplica__pb2.DeleteRequest.SerializeToString,
+            CommWithReplica__pb2.DeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -10,9 +10,6 @@ import CommWithReplica_pb2_grpc
 import CommWithReplica_pb2
 import grpc
 import logging
-import uuid
-
-unique_id = str(uuid.uuid1())
 
 
 def getListOfServers(stub, request):
@@ -28,22 +25,11 @@ def runRegistryServer(IP, port):
         getListOfServers(stub, request)
 
 
-def runServer(client, choice):
-    print("Enter Server Information")
-    info = input()
-    list_string = info.split(' ')
-    server = ["", "", ""]
-    server[0] = list_string[0]
-    server[1], server[2] = list_string[1].split(":")
-    server[2] = int(server[2])
-    # if choice == 2:
-    #     joinServer(client, server)
-    # elif choice == 3:
-    #     leaveServer(client, server)
-    # elif choice == 4:
-    #     getArticles(client, server)
-    # elif choice == 5:
-    #     publishArticles(client, server)
+def write(server, uuid, fileName, content):
+    serverAddr = server[0]+":"+str(server[1])
+    with grpc.insecure_channel(serverAddr) as channel:
+        stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
+        stub.WriteRequest(uuid=uuid, name=fileName, content=content)
 
 
 if __name__ == '__main__':
