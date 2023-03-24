@@ -31,13 +31,18 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         Replicas[request.name] = (request.ip, request.port)
         return CommWithReplica_pb2.StatusRepReq(status="SUCCESS")  
 
+    def ConnectToReplica(self, request, context):
+        Files[request.uuid] = [request.name, request.version]
+        requestTowrite = CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content)
+        status = writeInFile(requestTowrite)
+        return status
+    
     def ConnectToPR(self, request, context):
-        print("WRITE REQUEST FROM REPLICA : " + request.replica.name)
 
         flag = 1
-        if request.request.uuid not in Files.keys():
+        if request.uuid not in Files.keys():
             for uuid in Files.keys():
-                if Files[uuid][0] == request.request.name:
+                if Files[uuid][0] == request.name:
                     flag = 0
                     break
                     
@@ -45,7 +50,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                 ct = datetime.datetime.now()
                 timestamp = ct.timestamp()
                 time = Timestamp(seconds=int(timestamp))
-                Files[request.request.uuid] = [request.request.name, time]
+                Files[request.uuid] = [request.name, time]
                 
         else:
             for uuid in Files.keys():
@@ -58,14 +63,29 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                 ct = datetime.datetime.now()
                 timestamp = ct.timestamp()
                 time = Timestamp(seconds=int(timestamp))
-                Files[request.request.uuid][1] = time
+                Files[request.uuid][1] = time
 
-        status = writeInFile(request.request)
+        status = writeInFile(request)
 
         if "SUCCESS" in status.status:
             # Contact all replicas and get ack
+            count = 0
+
+            for replica in Replicas.keys():
+                serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
+
+                with grpc.insecure_channel(serverAddr) as channel:
+                    stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+                    status = stub.ConnectToReplica(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
+                
+                if 'SUCCESS' in status.status:
+                    count +=1
+
+            if count == len(Replicas):
+               return CommWithReplica_pb2.StatusRepReq(status=status.status) 
+
             # Then contact final backup 
-            return CommWithReplica_pb2.StatusRepReq(status=status.status)
+            return CommWithReplica_pb2.StatusRepReq(status="FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
 
         else:
             # Connect to final backup and send FAIL to client
@@ -77,9 +97,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         serverAddr = PR_details["ip"] + ":" + str(PR_details["port"])
         with grpc.insecure_channel(serverAddr) as channel:
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-            writeRequest = CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content)
-            address = CommWithReplica_pb2.Address(ip=selfDetails["ip"], port=selfDetails["port"], name=selfDetails["name"])
-            status = stub.ConnectToPR(CommWithReplica_pb2.ConnectToPRRequest(request=writeRequest, replica=address))
+            status = stub.ConnectToPR(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
             return status
 
 
