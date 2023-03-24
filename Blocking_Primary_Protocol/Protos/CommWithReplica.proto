@@ -4,11 +4,13 @@ import "google/protobuf/timestamp.proto";
 
 service CommWithReplica{
     rpc SendDetailsOfPR(Address) returns (StatusRepReq) {}
-    rpc Write(WriteRequest) returns (StatusRepReq) {}
+    rpc Write(WriteRequest) returns (WriteResponse) {}
     rpc Read(ReadRequest) returns (ReadResponse) {}
     rpc Delete(DeleteRequest) returns (StatusRepReq) {}
-    rpc ConnectToPR(WriteRequest) returns (StatusRepReq) {}
-    rpc ConnectToReplica(Request) returns (StatusRepReq) {}
+    rpc ConnectToPRforWrite(WriteRequest) returns (StatusRepReq) {}
+    rpc ConnectToPRforDelete(DeleteRequest) returns (StatusRepReq) {}
+    rpc ConnectToReplicaforWrite(Request) returns (StatusRepReq) {}
+    rpc ConnectToReplicaforDelete(DeleteRequestToReplica) returns (StatusRepReq) {}
 }
 
 message Address{
@@ -40,6 +42,17 @@ message ReadRequest{
 
 message DeleteRequest{
     string uuid = 1;
+}
+
+message DeleteRequestToReplica{
+    string uuid = 1;
+    google.protobuf.Timestamp version = 2;
+}
+
+message WriteResponse{
+    string status = 1;
+    string uuid = 2;
+    google.protobuf.Timestamp version = 3;
 }
 
 message ReadResponse{

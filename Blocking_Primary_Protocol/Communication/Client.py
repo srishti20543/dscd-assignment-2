@@ -44,5 +44,12 @@ def read(server, uuid):
         print(status.content)
         print(date)
 
+def delete(server, uuid):
+    serverAddr = server[0]+":"+str(server[1])
+    with grpc.insecure_channel(serverAddr) as channel:
+        stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+        status = stub.Delete(CommWithReplica_pb2.DeleteRequest(uuid=uuid))
+        print(status)
+
 if __name__ == '__main__':
     pass

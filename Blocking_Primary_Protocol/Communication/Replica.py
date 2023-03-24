@@ -31,14 +31,21 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         Replicas[request.name] = (request.ip, request.port)
         return CommWithReplica_pb2.StatusRepReq(status="SUCCESS")  
 
-    def ConnectToReplica(self, request, context):
+
+    def ConnectToReplicaforWrite(self, request, context):
         Files[request.uuid] = [request.name, request.version]
         requestTowrite = CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content)
         status = writeInFile(requestTowrite)
         return status
     
-    def ConnectToPR(self, request, context):
+    def ConnectToReplicaforDelete(self, request, context):
+        Files[request.uuid][1] = request.version
+        requestToDelete = CommWithReplica_pb2.DeleteRequest(uuid=request.uuid)
+        status = DeleteFile(requestToDelete)
+        return status
+    
 
+    def ConnectToPRforWrite(self, request, context):
         flag = 1
         if request.uuid not in Files.keys():
             for uuid in Files.keys():
@@ -76,7 +83,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
                 with grpc.insecure_channel(serverAddr) as channel:
                     stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-                    status = stub.ConnectToReplica(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
+                    status = stub.ConnectToReplicaforWrite(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
                 
                 if 'SUCCESS' in status.status:
                     count +=1
@@ -90,6 +97,46 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         else:
             # Connect to final backup and send FAIL to client
             return CommWithReplica_pb2.StatusRepReq(status=status.status)
+        
+
+    def ConnectToPRforDelete(self, request, context):
+        flag = 0
+        if request.uuid in Files.keys():
+            if Files[request.uuid][0] == "":
+                    flag = 1
+                    
+            if flag == 0:
+                # Open a file for writing
+                ct = datetime.datetime.now()
+                timestamp = ct.timestamp()
+                time = Timestamp(seconds=int(timestamp))
+                Files[request.uuid][1] = time
+
+        status = DeleteFile(request)
+
+        if "SUCCESS" in status.status:
+            # Contact all replicas and get ack
+            count = 0
+
+            for replica in Replicas.keys():
+                serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
+
+                with grpc.insecure_channel(serverAddr) as channel:
+                    stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+                    status = stub.ConnectToReplicaforDelete(CommWithReplica_pb2.DeleteRequestToReplica(uuid=request.uuid, version=Files[request.uuid][1]))
+                
+                if 'SUCCESS' in status.status:
+                    count +=1
+
+            if count == len(Replicas):
+               return CommWithReplica_pb2.StatusRepReq(status=status.status) 
+
+            # Then contact final backup 
+            return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETE NOT COMPLETED IN ALL REPLICAS")
+
+        else:
+            # Connect to final backup and send FAIL to client
+            return CommWithReplica_pb2.StatusRepReq(status=status.status)
 
 
     def Write(self, request, context):
@@ -97,8 +144,13 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         serverAddr = PR_details["ip"] + ":" + str(PR_details["port"])
         with grpc.insecure_channel(serverAddr) as channel:
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-            status = stub.ConnectToPR(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
-            return status
+            status = stub.ConnectToPRforWrite(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
+
+            if "SUCCESS" in status.status:
+                return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=request.uuid, version=Files[request.uuid][1])
+            else:
+                return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=None, version=None)
+
 
     def Read(self, request, context):
         if request.uuid in Files.keys():
@@ -114,6 +166,17 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                         return CommWithReplica_pb2.ReadResponse(status="SUCCESS", name=Files[uuid][0], content=content, version=Files[uuid][1])
         else:
             return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
+        
+
+    def Delete(self, request, context):
+        # Primary Replica -> Connection
+        serverAddr = PR_details["ip"] + ":" + str(PR_details["port"])
+        with grpc.insecure_channel(serverAddr) as channel:
+            stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+            status = stub.ConnectToPRforDelete(CommWithReplica_pb2.DeleteRequest(uuid=request.uuid))
+        
+        return CommWithReplica_pb2.StatusRepReq(status=status.status)
+
 
 def writeInFile(request):
     flag = 1
@@ -147,6 +210,29 @@ def writeInFile(request):
             return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
         else:
             return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+
+
+def DeleteFile(request):
+    flag = 0
+    if request.uuid not in Files.keys():
+        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXISTS")
+    else:
+        if request.uuid in Files.keys():
+            if Files[request.uuid][0] == "":
+                    flag = 1
+                
+        if flag == 0:
+            # Open a file for writing
+            directory = "../Datafile/" + selfDetails["name"] + "/" +  Files[request.uuid][0]
+            if os.path.exists(directory):
+                # Delete the file
+                os.remove(directory)
+                print(f"File {directory} has been deleted.")
+
+            Files[request.uuid][0] = ""
+            return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
+        else:
+            return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE ALREADY DELETED")
 
 
 def connectToRegistry(ip, port):
@@ -183,14 +269,6 @@ def ConnectToReplica(ip, port):
     server.add_insecure_port('[::]:' + str(port))
     server.start()
     server.wait_for_termination()
-
-
-# def connectToClient(arg):
-#     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-#     CommWithReplica_pb2_grpc.add_CommWithReplicaServicer_to_server(CommWithReplicaServicer(), server)
-#     server.add_insecure_port('[::]:' + str(arg[2]))
-#     server.start()
-#     server.wait_for_termination()
 
 
 if __name__ == '__main__':

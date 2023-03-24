@@ -21,6 +21,14 @@ class DeleteRequest(_message.Message):
     uuid: str
     def __init__(self, uuid: _Optional[str] = ...) -> None: ...
 
+class DeleteRequestToReplica(_message.Message):
+    __slots__ = ["uuid", "version"]
+    UUID_FIELD_NUMBER: _ClassVar[int]
+    VERSION_FIELD_NUMBER: _ClassVar[int]
+    uuid: str
+    version: _timestamp_pb2.Timestamp
+    def __init__(self, uuid: _Optional[str] = ..., version: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
 class ReadRequest(_message.Message):
     __slots__ = ["uuid"]
     UUID_FIELD_NUMBER: _ClassVar[int]
@@ -66,3 +74,13 @@ class WriteRequest(_message.Message):
     name: str
     uuid: str
     def __init__(self, uuid: _Optional[str] = ..., name: _Optional[str] = ..., content: _Optional[str] = ...) -> None: ...
+
+class WriteResponse(_message.Message):
+    __slots__ = ["status", "uuid", "version"]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    UUID_FIELD_NUMBER: _ClassVar[int]
+    VERSION_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    uuid: str
+    version: _timestamp_pb2.Timestamp
+    def __init__(self, status: _Optional[str] = ..., uuid: _Optional[str] = ..., version: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
