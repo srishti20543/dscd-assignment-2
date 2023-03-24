@@ -24,8 +24,8 @@ Files = {}
 class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
     def SendDetailsOfPR(self, request, context):
-        print("NEW BACK UP SERVER HAS JOINED")
-        print(request)
+        print("PRIMARY REPLICA: NEW BACK UP REPLICA HAS JOINED")
+        print("Got details of replica: " + request.name + "\n")
         if request.name in Replicas.keys():
             return CommWithReplica_pb2.StatusRepReq(status="FAIL")
         Replicas[request.name] = (request.ip, request.port)
@@ -227,7 +227,7 @@ def DeleteFile(request):
             if os.path.exists(directory):
                 # Delete the file
                 os.remove(directory)
-                print(f"File {directory} has been deleted.")
+                
 
             Files[request.uuid][0] = ""
             return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
@@ -249,18 +249,16 @@ def connectToRegistry(ip, port):
             PR_details['name'] = status.primaryServerAddress.name
             PR_details['ip'] = status.primaryServerAddress.ip
             PR_details['port'] = status.primaryServerAddress.port
-            print(selfDetails["name"] + " SUCCESSFULLY REGISTERED")
-            print("PR Details ", PR_details)
+            print("REPLICA: " + selfDetails["name"] + " WAS SUCCESSFULLY REGISTERED")
+            print("PR Details : ", PR_details)
+            print("\n")
 
             directory = "../Datafile/"+selfDetails["name"]+"/"
             if not os.path.exists(directory):
                 os.makedirs(directory)
-                print(f"Directory {directory} created successfully.")
-            else:
-                print(f"Directory {directory} already exists.")
 
         else:
-            print(status.status)
+            print("REPLICA: Status for connecting to Registry Server: " + status.status)
 
     
 def ConnectToReplica(ip, port):
