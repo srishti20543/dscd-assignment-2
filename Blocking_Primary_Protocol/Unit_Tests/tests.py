@@ -28,6 +28,11 @@ def stepsForClient2(IP, port):
     fileName = "file1.txt"
     content = "coding in file1"
     Client.write(server, unique_id1, fileName, content)
+    Client.read(server, unique_id1)
+    server = ["localhost", 5002]
+    Client.read(server, unique_id1)
+    server = ["localhost", 5000]
+    Client.read(server, unique_id1)
 
 
 def setUp():

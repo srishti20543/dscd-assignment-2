@@ -32,5 +32,17 @@ def write(server, uuid, fileName, content):
         status = stub.Write(CommWithReplica_pb2.WriteRequest(uuid=uuid, name=fileName, content=content))
         print(status)
 
+def read(server, uuid):
+    serverAddr = server[0]+":"+str(server[1])
+    with grpc.insecure_channel(serverAddr) as channel:
+        stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+        status = stub.Read(CommWithReplica_pb2.ReadRequest(uuid=uuid))
+        time = status.version
+        date = datetime.fromtimestamp(time.seconds)
+        print(status.status)
+        print(status.name)
+        print(status.content)
+        print(date)
+
 if __name__ == '__main__':
     pass

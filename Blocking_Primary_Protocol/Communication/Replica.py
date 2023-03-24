@@ -100,6 +100,20 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             status = stub.ConnectToPR(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
             return status
 
+    def Read(self, request, context):
+        if request.uuid in Files.keys():
+            for uuid in Files.keys():
+                if uuid == request.uuid:
+                    if Files[uuid][0] == "":
+                        return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE ALREADY DELETED", name=None, content=None, version=None)
+                    else:
+                        directory = "../Datafile/"+selfDetails["name"] + "/"
+                        with open(directory+Files[uuid][0], "r") as f:
+                            # Write some text to the file
+                            content = f.read()
+                        return CommWithReplica_pb2.ReadResponse(status="SUCCESS", name=Files[uuid][0], content=content, version=Files[uuid][1])
+        else:
+            return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
 
 def writeInFile(request):
     flag = 1
