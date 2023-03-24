@@ -6,14 +6,14 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Address(_message.Message):
-    __slots__ = ["IP", "name", "port"]
-    IP: str
+    __slots__ = ["ip", "name", "port"]
     IP_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     PORT_FIELD_NUMBER: _ClassVar[int]
+    ip: str
     name: str
     port: int
-    def __init__(self, name: _Optional[str] = ..., IP: _Optional[str] = ..., port: _Optional[int] = ...) -> None: ...
+    def __init__(self, name: _Optional[str] = ..., ip: _Optional[str] = ..., port: _Optional[int] = ...) -> None: ...
 
 class DeleteRequest(_message.Message):
     __slots__ = ["uuid"]
@@ -46,10 +46,10 @@ class ReadResponse(_message.Message):
     def __init__(self, status: _Optional[str] = ..., name: _Optional[str] = ..., content: _Optional[str] = ..., version: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class SendDetailsOfPRResponse(_message.Message):
-    __slots__ = ["Status"]
+    __slots__ = ["status"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
-    Status: str
-    def __init__(self, Status: _Optional[str] = ...) -> None: ...
+    status: str
+    def __init__(self, status: _Optional[str] = ...) -> None: ...
 
 class WriteRequest(_message.Message):
     __slots__ = ["content", "name", "uuid"]

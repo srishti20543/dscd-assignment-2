@@ -15,22 +15,22 @@ import logging
 def getListOfServers(stub, request):
     status = stub.getReplicaList(request)
     for x in status:
-        print(x.replicaServer.name + " - " + x.replicaServer.IP + ":" + str(x.replicaServer.port))
+        print(x.replicaServer.name + " - " + x.replicaServer.ip + ":" + str(x.replicaServer.port))
 
 
-def runRegistryServer(IP, port):
+def runRegistryServer(ip, port):
     with grpc.insecure_channel('localhost:8888') as channel:
         stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
-        request = CommWithReplica_pb2.Address(name=None, IP=IP, port=port)
+        request = CommWithReplica_pb2.Address(name=None, ip=ip, port=port)
         getListOfServers(stub, request)
 
 
 def write(server, uuid, fileName, content):
     serverAddr = server[0]+":"+str(server[1])
     with grpc.insecure_channel(serverAddr) as channel:
-        stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
-        stub.WriteRequest(uuid=uuid, name=fileName, content=content)
-
+        stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+        status = stub.Write(CommWithReplica_pb2.WriteRequest(uuid=uuid, name=fileName, content=content))
+        print(status)
 
 if __name__ == '__main__':
     pass

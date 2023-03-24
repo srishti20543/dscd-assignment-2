@@ -28,11 +28,11 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         print("NEW BACK UP SERVER HAS JOINED")
         print(request)
         if request.name in Replicas.keys():
-            return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="FAIL")
-        Replicas[request.name] = (request.IP, request.port)
-        return CommWithReplica_pb2.SendDetailsOfPRResponse(Status="SUCCESS")       
+            return CommWithReplica_pb2.SendDetailsOfPRResponse(status="FAIL")
+        Replicas[request.name] = (request.ip, request.port)
+        return CommWithReplica_pb2.SendDetailsOfPRResponse(status="SUCCESS")       
 
-    def WriteRequest(self, request, context):
+    def Write(self, request, context):
         flag = 1
         if request.uuid not in Files.keys():
             for uuid in Files.keys():
@@ -46,9 +46,9 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                 with open(directory+request.name, "w") as f:
                     # Write some text to the file
                     f.write(request.content)
-                return CommWithReplica_pb2.WriteResponse(Status="SUCCESS") 
+                return CommWithReplica_pb2.WriteResponse(status="SUCCESS") 
             else:
-                return CommWithReplica_pb2.WriteResponse(Status="FAIL, FILE WITH THE SAME NAME ALREADY EXISTS")
+                return CommWithReplica_pb2.WriteResponse(status="FAIL, FILE WITH THE SAME NAME ALREADY EXISTS")
         else:
             for uuid in Files.keys():
                 if Files[uuid][0] == request.name:
@@ -61,23 +61,23 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                 with open(directory+request.name, "w") as f:
                     # Write some text to the file
                     f.write(request.content)
-                return CommWithReplica_pb2.WriteResponse(Status="SUCCESS") 
+                return CommWithReplica_pb2.WriteResponse(status="SUCCESS") 
             else:
-                return CommWithReplica_pb2.WriteResponse(Status="FAIL, DELETED FILE CANNOT BE UPDATED")
+                return CommWithReplica_pb2.WriteResponse(status="FAIL, DELETED FILE CANNOT BE UPDATED")
 
 
-def connectToRegistry(IP, port):
+def connectToRegistry(ip, port):
     global selfName
 
     with grpc.insecure_channel('localhost:8888') as channel:
         stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
-        request = CommWithReplica_pb2.Address(IP=IP, port=port, name=None)
+        request = CommWithReplica_pb2.Address(ip=ip, port=port, name=None)
         status = stub.Register(request)
 
         if status.status == "SUCCESS":
             selfName = status.selfName
             PR_details['name'] = status.primaryServerAddress.name
-            PR_details['IP'] = status.primaryServerAddress.IP
+            PR_details['ip'] = status.primaryServerAddress.ip
             PR_details['port'] = status.primaryServerAddress.port
             print(selfName + " SUCCESSFULLY REGISTERED")
             print("PR Details ", PR_details)
@@ -93,7 +93,7 @@ def connectToRegistry(IP, port):
             print(status.status)
 
     
-def ConnectToReplica(IP, port):
+def ConnectToReplica(ip, port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     CommWithReplica_pb2_grpc.add_CommWithReplicaServicer_to_server(CommWithReplicaServicer(), server)
     server.add_insecure_port('[::]:' + str(port))
