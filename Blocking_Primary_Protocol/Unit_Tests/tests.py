@@ -23,7 +23,7 @@ def stepsForClient1(IP, port):
 
 def stepsForClient2(IP, port):
     Client.runRegistryServer(IP, port)
-    server = ["localhost", 5000]
+    server = ["localhost", 5001]
     unique_id1 = str(uuid.uuid1())
     fileName = "file1.txt"
     content = "coding in file1"
@@ -45,12 +45,7 @@ def setUp():
     time.sleep(2)
     client2 = Process(target=stepsForClient2, args=("localhost", 7000))
     client2.start()
-
-    # client1.join()
-    # client2.join()
-    # server1.join()
-    # server2.join()
-    # registryServer.join()    
+  
     
 
 if __name__ == '__main__':

@@ -17,12 +17,12 @@ class CommWithReplicaStub(object):
         self.SendDetailsOfPR = channel.unary_unary(
                 '/CommWithReplica/SendDetailsOfPR',
                 request_serializer=CommWithReplica__pb2.Address.SerializeToString,
-                response_deserializer=CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
                 )
         self.Write = channel.unary_unary(
                 '/CommWithReplica/Write',
                 request_serializer=CommWithReplica__pb2.WriteRequest.SerializeToString,
-                response_deserializer=CommWithReplica__pb2.WriteResponse.FromString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
                 )
         self.Read = channel.unary_unary(
                 '/CommWithReplica/Read',
@@ -32,7 +32,17 @@ class CommWithReplicaStub(object):
         self.Delete = channel.unary_unary(
                 '/CommWithReplica/Delete',
                 request_serializer=CommWithReplica__pb2.DeleteRequest.SerializeToString,
-                response_deserializer=CommWithReplica__pb2.DeleteResponse.FromString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
+                )
+        self.ConnectToPR = channel.unary_unary(
+                '/CommWithReplica/ConnectToPR',
+                request_serializer=CommWithReplica__pb2.ConnectToPRRequest.SerializeToString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
+                )
+        self.ConnectBackToReplica = channel.unary_unary(
+                '/CommWithReplica/ConnectBackToReplica',
+                request_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
                 )
 
 
@@ -63,18 +73,30 @@ class CommWithReplicaServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ConnectToPR(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ConnectBackToReplica(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_CommWithReplicaServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SendDetailsOfPR': grpc.unary_unary_rpc_method_handler(
                     servicer.SendDetailsOfPR,
                     request_deserializer=CommWithReplica__pb2.Address.FromString,
-                    response_serializer=CommWithReplica__pb2.SendDetailsOfPRResponse.SerializeToString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
             ),
             'Write': grpc.unary_unary_rpc_method_handler(
                     servicer.Write,
                     request_deserializer=CommWithReplica__pb2.WriteRequest.FromString,
-                    response_serializer=CommWithReplica__pb2.WriteResponse.SerializeToString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
             ),
             'Read': grpc.unary_unary_rpc_method_handler(
                     servicer.Read,
@@ -84,7 +106,17 @@ def add_CommWithReplicaServicer_to_server(servicer, server):
             'Delete': grpc.unary_unary_rpc_method_handler(
                     servicer.Delete,
                     request_deserializer=CommWithReplica__pb2.DeleteRequest.FromString,
-                    response_serializer=CommWithReplica__pb2.DeleteResponse.SerializeToString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
+            ),
+            'ConnectToPR': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConnectToPR,
+                    request_deserializer=CommWithReplica__pb2.ConnectToPRRequest.FromString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
+            ),
+            'ConnectBackToReplica': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConnectBackToReplica,
+                    request_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -109,7 +141,7 @@ class CommWithReplica(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommWithReplica/SendDetailsOfPR',
             CommWithReplica__pb2.Address.SerializeToString,
-            CommWithReplica__pb2.SendDetailsOfPRResponse.FromString,
+            CommWithReplica__pb2.StatusRepReq.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -126,7 +158,7 @@ class CommWithReplica(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommWithReplica/Write',
             CommWithReplica__pb2.WriteRequest.SerializeToString,
-            CommWithReplica__pb2.WriteResponse.FromString,
+            CommWithReplica__pb2.StatusRepReq.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -160,6 +192,40 @@ class CommWithReplica(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommWithReplica/Delete',
             CommWithReplica__pb2.DeleteRequest.SerializeToString,
-            CommWithReplica__pb2.DeleteResponse.FromString,
+            CommWithReplica__pb2.StatusRepReq.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ConnectToPR(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/CommWithReplica/ConnectToPR',
+            CommWithReplica__pb2.ConnectToPRRequest.SerializeToString,
+            CommWithReplica__pb2.StatusRepReq.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ConnectBackToReplica(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/CommWithReplica/ConnectBackToReplica',
+            CommWithReplica__pb2.StatusRepReq.SerializeToString,
+            CommWithReplica__pb2.StatusRepReq.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

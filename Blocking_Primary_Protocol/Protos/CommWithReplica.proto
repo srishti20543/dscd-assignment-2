@@ -3,10 +3,12 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 service CommWithReplica{
-    rpc SendDetailsOfPR(Address) returns (SendDetailsOfPRResponse) {}
-    rpc Write(WriteRequest) returns (WriteResponse) {}
+    rpc SendDetailsOfPR(Address) returns (StatusRepReq) {}
+    rpc Write(WriteRequest) returns (StatusRepReq) {}
     rpc Read(ReadRequest) returns (ReadResponse) {}
-    rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+    rpc Delete(DeleteRequest) returns (StatusRepReq) {}
+    rpc ConnectToPR(ConnectToPRRequest) returns (StatusRepReq) {}
+    rpc ConnectBackToReplica(StatusRepReq) returns (StatusRepReq) {}
 }
 
 message Address{
@@ -15,8 +17,13 @@ message Address{
     int32 port = 3;
 }
 
-message SendDetailsOfPRResponse{
+message StatusRepReq{
     string status = 1;
+}
+
+message ConnectToPRRequest{
+    WriteRequest request = 1;
+    Address replica = 2;
 }
 
 message WriteRequest{
@@ -33,17 +40,9 @@ message DeleteRequest{
     string uuid = 1;
 }
 
-message WriteResponse{
-    string status = 1;
-}
-
 message ReadResponse{
     string status = 1;
     string name = 2;
     string content = 3;
     google.protobuf.Timestamp version = 4;
-}
-
-message DeleteResponse{
-    string status = 1;
 }

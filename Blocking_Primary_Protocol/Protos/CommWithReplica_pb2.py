@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x43ommWithReplica.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"1\n\x07\x41\x64\x64ress\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02ip\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\")\n\x17SendDetailsOfPRResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\";\n\x0cWriteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1b\n\x0bReadRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"\x1d\n\rDeleteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"\x1f\n\rWriteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\"j\n\x0cReadResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12+\n\x07version\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\" \n\x0e\x44\x65leteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\xc8\x01\n\x0f\x43ommWithReplica\x12\x37\n\x0fSendDetailsOfPR\x12\x08.Address\x1a\x18.SendDetailsOfPRResponse\"\x00\x12(\n\x05Write\x12\r.WriteRequest\x1a\x0e.WriteResponse\"\x00\x12%\n\x04Read\x12\x0c.ReadRequest\x1a\r.ReadResponse\"\x00\x12+\n\x06\x44\x65lete\x12\x0e.DeleteRequest\x1a\x0f.DeleteResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x43ommWithReplica.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"1\n\x07\x41\x64\x64ress\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02ip\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\x1e\n\x0cStatusRepReq\x12\x0e\n\x06status\x18\x01 \x01(\t\"O\n\x12\x43onnectToPRRequest\x12\x1e\n\x07request\x18\x01 \x01(\x0b\x32\r.WriteRequest\x12\x19\n\x07replica\x18\x02 \x01(\x0b\x32\x08.Address\";\n\x0cWriteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1b\n\x0bReadRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"\x1d\n\rDeleteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"j\n\x0cReadResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12+\n\x07version\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2\xa7\x02\n\x0f\x43ommWithReplica\x12,\n\x0fSendDetailsOfPR\x12\x08.Address\x1a\r.StatusRepReq\"\x00\x12\'\n\x05Write\x12\r.WriteRequest\x1a\r.StatusRepReq\"\x00\x12%\n\x04Read\x12\x0c.ReadRequest\x1a\r.ReadResponse\"\x00\x12)\n\x06\x44\x65lete\x12\x0e.DeleteRequest\x1a\r.StatusRepReq\"\x00\x12\x33\n\x0b\x43onnectToPR\x12\x13.ConnectToPRRequest\x1a\r.StatusRepReq\"\x00\x12\x36\n\x14\x43onnectBackToReplica\x12\r.StatusRepReq\x1a\r.StatusRepReq\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'CommWithReplica_pb2', globals())
@@ -23,20 +23,18 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _ADDRESS._serialized_start=58
   _ADDRESS._serialized_end=107
-  _SENDDETAILSOFPRRESPONSE._serialized_start=109
-  _SENDDETAILSOFPRRESPONSE._serialized_end=150
-  _WRITEREQUEST._serialized_start=152
-  _WRITEREQUEST._serialized_end=211
-  _READREQUEST._serialized_start=213
-  _READREQUEST._serialized_end=240
-  _DELETEREQUEST._serialized_start=242
-  _DELETEREQUEST._serialized_end=271
-  _WRITERESPONSE._serialized_start=273
-  _WRITERESPONSE._serialized_end=304
-  _READRESPONSE._serialized_start=306
-  _READRESPONSE._serialized_end=412
-  _DELETERESPONSE._serialized_start=414
-  _DELETERESPONSE._serialized_end=446
-  _COMMWITHREPLICA._serialized_start=449
-  _COMMWITHREPLICA._serialized_end=649
+  _STATUSREPREQ._serialized_start=109
+  _STATUSREPREQ._serialized_end=139
+  _CONNECTTOPRREQUEST._serialized_start=141
+  _CONNECTTOPRREQUEST._serialized_end=220
+  _WRITEREQUEST._serialized_start=222
+  _WRITEREQUEST._serialized_end=281
+  _READREQUEST._serialized_start=283
+  _READREQUEST._serialized_end=310
+  _DELETEREQUEST._serialized_start=312
+  _DELETEREQUEST._serialized_end=341
+  _READRESPONSE._serialized_start=343
+  _READRESPONSE._serialized_end=449
+  _COMMWITHREPLICA._serialized_start=452
+  _COMMWITHREPLICA._serialized_end=747
 # @@protoc_insertion_point(module_scope)
