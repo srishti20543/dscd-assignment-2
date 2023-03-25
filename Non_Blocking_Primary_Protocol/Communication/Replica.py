@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import sys
+import threading
 sys.path.insert(1, '../Protos')
 
 from concurrent import futures
@@ -10,7 +11,7 @@ import CommWithRegistryServer_pb2_grpc
 import CommWithRegistryServer_pb2
 import CommWithReplica_pb2_grpc
 import CommWithReplica_pb2
-from multiprocessing import Process
+from threading import Thread
 import grpc
 import logging
 import datetime
@@ -21,6 +22,20 @@ PR_details = {}
 Replicas = {}
 Files = {}
 
+class ThreadWithReturnValue(Thread):
+    
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                                **self._kwargs)
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
 
 class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
@@ -78,9 +93,12 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
         if "SUCCESS" in status.status:
             # Contact all replicas and get ack
-            thread = Process(target=PerformWriteOnBackUp, args=(request,))
+            retThread = ThreadWithReturnValue(target=returnFunctionForThread, args=(status,))
+            retThread.start()
+            result = retThread.join()
+            thread = ThreadWithReturnValue(target=PerformWriteOnBackUp, args=(request,))
             thread.start()
-            return CommWithReplica_pb2.StatusRepReq(status=status.status)
+            return result
 
         else:
             # Connect to final backup and send FAIL to client
@@ -134,8 +152,9 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
             status = stub.ConnectToPRforWrite(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
 
+            print("Done writing in Primary Replica")
             if "SUCCESS" in status.status:
-                return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=request.uuid, version=Files[request.uuid][1])
+                return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=request.uuid, version=status.version)
             else:
                 return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=None, version=None)
 
@@ -164,7 +183,12 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             status = stub.ConnectToPRforDelete(CommWithReplica_pb2.DeleteRequest(uuid=request.uuid))
         
         return CommWithReplica_pb2.StatusRepReq(status=status.status)
-    
+
+
+def returnFunctionForThread(status):
+    return status
+
+
 def PerformWriteOnBackUp(request):
     count = 0
     for replica in Replicas.keys():
@@ -178,11 +202,12 @@ def PerformWriteOnBackUp(request):
             count +=1
 
     if count == len(Replicas):
-        print(CommWithReplica_pb2.StatusRepReq(status=status.status) + ": ALL REPLICAS UPDATED")
+        print(status.status + ": ALL REPLICAS UPDATED")
 
     # Then contact final backup 
     else:
-        print(CommWithReplica_pb2.StatusRepReq(status="FAIL, WRITE NOT COMPLETED IN ALL REPLICAS"))
+        print("FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
+
 
 def writeInFile(request):
     flag = 1
@@ -198,9 +223,9 @@ def writeInFile(request):
             with open(directory+request.name, "w") as f:
                 # Write some text to the file
                 f.write(request.content)
-            return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
+            return CommWithReplica_pb2.StatusRepReqWithVersion(status="SUCCESS", version=Files[request.uuid][1]) 
         else:
-            return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE WITH THE SAME NAME ALREADY EXISTS")
+            return CommWithReplica_pb2.StatusRepReqWithVersion(status="FAIL, FILE WITH THE SAME NAME ALREADY EXISTS", version=None)
     else:
         for uuid in Files.keys():
             if Files[uuid][0] == request.name:
@@ -213,9 +238,9 @@ def writeInFile(request):
             with open(directory+request.name, "w") as f:
                 # Write some text to the file
                 f.write(request.content)
-            return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
+            return CommWithReplica_pb2.StatusRepReqWithVersion(status="SUCCESS", version=Files[request.uuid][1]) 
         else:
-            return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            return CommWithReplica_pb2.StatusRepReqWithVersion(status="FAIL, DELETED FILE CANNOT BE UPDATED", version=None)
 
 
 def DeleteFile(request):

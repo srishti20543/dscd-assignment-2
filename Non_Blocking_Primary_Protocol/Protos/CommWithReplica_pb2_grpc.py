@@ -37,7 +37,7 @@ class CommWithReplicaStub(object):
         self.ConnectToPRforWrite = channel.unary_unary(
                 '/CommWithReplica/ConnectToPRforWrite',
                 request_serializer=CommWithReplica__pb2.WriteRequest.SerializeToString,
-                response_deserializer=CommWithReplica__pb2.StatusRepReq.FromString,
+                response_deserializer=CommWithReplica__pb2.StatusRepReqWithVersion.FromString,
                 )
         self.ConnectToPRforDelete = channel.unary_unary(
                 '/CommWithReplica/ConnectToPRforDelete',
@@ -133,7 +133,7 @@ def add_CommWithReplicaServicer_to_server(servicer, server):
             'ConnectToPRforWrite': grpc.unary_unary_rpc_method_handler(
                     servicer.ConnectToPRforWrite,
                     request_deserializer=CommWithReplica__pb2.WriteRequest.FromString,
-                    response_serializer=CommWithReplica__pb2.StatusRepReq.SerializeToString,
+                    response_serializer=CommWithReplica__pb2.StatusRepReqWithVersion.SerializeToString,
             ),
             'ConnectToPRforDelete': grpc.unary_unary_rpc_method_handler(
                     servicer.ConnectToPRforDelete,
@@ -241,7 +241,7 @@ class CommWithReplica(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommWithReplica/ConnectToPRforWrite',
             CommWithReplica__pb2.WriteRequest.SerializeToString,
-            CommWithReplica__pb2.StatusRepReq.FromString,
+            CommWithReplica__pb2.StatusRepReqWithVersion.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

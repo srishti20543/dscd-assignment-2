@@ -65,6 +65,14 @@ class StatusRepReq(_message.Message):
     status: str
     def __init__(self, status: _Optional[str] = ...) -> None: ...
 
+class StatusRepReqWithVersion(_message.Message):
+    __slots__ = ["status", "version"]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    VERSION_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    version: _timestamp_pb2.Timestamp
+    def __init__(self, status: _Optional[str] = ..., version: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
 class WriteRequest(_message.Message):
     __slots__ = ["content", "name", "uuid"]
     CONTENT_FIELD_NUMBER: _ClassVar[int]

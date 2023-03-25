@@ -7,7 +7,7 @@ service CommWithReplica{
     rpc Write(WriteRequest) returns (WriteResponse) {}
     rpc Read(ReadRequest) returns (ReadResponse) {}
     rpc Delete(DeleteRequest) returns (StatusRepReq) {}
-    rpc ConnectToPRforWrite(WriteRequest) returns (StatusRepReq) {}
+    rpc ConnectToPRforWrite(WriteRequest) returns (StatusRepReqWithVersion) {}
     rpc ConnectToPRforDelete(DeleteRequest) returns (StatusRepReq) {}
     rpc ConnectToReplicaforWrite(Request) returns (StatusRepReq) {}
     rpc ConnectToReplicaforDelete(DeleteRequestToReplica) returns (StatusRepReq) {}
@@ -21,6 +21,11 @@ message Address{
 
 message StatusRepReq{
     string status = 1;
+}
+
+message StatusRepReqWithVersion{
+    string status = 1;
+    google.protobuf.Timestamp version = 2;
 }
 
 message WriteRequest{
