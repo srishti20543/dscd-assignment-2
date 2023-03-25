@@ -16,6 +16,7 @@ def getListOfServers(stub, request):
     status = stub.getReplicaList(request)
     for x in status:
         print(x.replicaServer.name + " - " + x.replicaServer.ip + ":" + str(x.replicaServer.port))
+    print("\n")
 
 
 def runRegistryServer(ip, port):
@@ -30,7 +31,14 @@ def write(server, uuid, fileName, content):
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.Write(CommWithReplica_pb2.WriteRequest(uuid=uuid, name=fileName, content=content))
-        print(status)
+        time = status.version
+        date = datetime.fromtimestamp(time.seconds)
+        print("CLIENT: ")
+        print("Status for write: " + status.status)
+        print("UUID: " + status.uuid)
+        if 'FAIL' in status.status:
+            date = ""
+        print("Version: " + str(date) + "\n")
 
 def read(server, uuid):
     serverAddr = server[0]+":"+str(server[1])
@@ -39,17 +47,20 @@ def read(server, uuid):
         status = stub.Read(CommWithReplica_pb2.ReadRequest(uuid=uuid))
         time = status.version
         date = datetime.fromtimestamp(time.seconds)
-        print(status.status)
-        print(status.name)
-        print(status.content)
-        print(date)
+        print("CLIENT:")
+        print("Status: " + status.status)
+        print("Name: " + status.name)
+        print("Content: " + status.content)
+        if status.name == "":
+            date = ""
+        print("Version: " + str(date) + "\n")
 
 def delete(server, uuid):
     serverAddr = server[0]+":"+str(server[1])
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.Delete(CommWithReplica_pb2.DeleteRequest(uuid=uuid))
-        print(status)
+        print("CLIENT: \nStatus for delete: " + status.status + "\n")
 
 if __name__ == '__main__':
     pass

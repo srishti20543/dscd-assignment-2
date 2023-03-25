@@ -35,7 +35,7 @@ def addReplicas(name, ip, port):
 class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithRegistryServerServicer):
 
     def Register(self, request, context):
-        print("JOIN REQUEST FROM " + request.ip + ":" + str(request.port))
+        print("REGISTRY SERVER: JOIN REQUEST FROM " + request.ip + ":" + str(request.port) + "\n")
         nextcount = len(Replicas) + 1
         name = 'replica_' + str(nextcount)
         result = addReplicas(name, request.ip, request.port)
@@ -52,7 +52,7 @@ class CommWithRegistryServerServicer(CommWithRegistryServer_pb2_grpc.CommWithReg
 
 
     def getReplicaList(self, request, context):
-        print("\nREPLICA LIST REQUEST FROM " + request.ip + ":" + str(request.port))
+        print("REGISTRY SERVER: REPLICA LIST REQUEST FROM CLIENT " + request.ip + ":" + str(request.port) + "\n")
         for replica in Replicas.keys():
             ip = Replicas[replica][0]
             port = Replicas[replica][1]

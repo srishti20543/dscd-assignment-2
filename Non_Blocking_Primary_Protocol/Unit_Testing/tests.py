@@ -28,13 +28,15 @@ def stepsForClient2(IP, port):
     fileName = "file1.txt"
     content = "coding in file1"
     Client.write(server, unique_id1, fileName, content)
+    server = ["localhost", 5005]
     Client.read(server, unique_id1)
-    server = ["localhost", 5002]
+    server = ["localhost", 5003]
     Client.read(server, unique_id1)
     server = ["localhost", 5000]
     Client.read(server, unique_id1)
     content = "coding in file1 again"
     Client.write(server, unique_id1, fileName, content)
+    # time.sleep(3)
     Client.read(server, unique_id1)
     server = ["localhost", 5001]
     Client.read(server, unique_id1)
@@ -47,6 +49,7 @@ def stepsForClient2(IP, port):
     server = ["localhost", 5005]
     Client.read(server, unique_id1)
     Client.delete(server, unique_id1)
+    # time.sleep(3)
     Client.read(server, unique_id1)
     server = ["localhost", 5001]
     Client.read(server, unique_id1)

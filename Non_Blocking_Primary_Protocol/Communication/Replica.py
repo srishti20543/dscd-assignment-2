@@ -40,8 +40,8 @@ class ThreadWithReturnValue(Thread):
 class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
     def SendDetailsOfPR(self, request, context):
-        print("NEW BACK UP SERVER HAS JOINED")
-        print(request)
+        print("PRIMARY REPLICA: NEW BACK UP REPLICA HAS JOINED")
+        print("Got details of replica: " + request.name + "\n")
         if request.name in Replicas.keys():
             return CommWithReplica_pb2.StatusRepReq(status="FAIL")
         Replicas[request.name] = (request.ip, request.port)
@@ -141,7 +141,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
             status = stub.ConnectToPRforWrite(CommWithReplica_pb2.WriteRequest(uuid=request.uuid, name=request.name, content=request.content))
 
-            print("Done writing in Primary Replica")
+            print("REPLICA: Write performed in Primary Replica\n")
             if "SUCCESS" in status.status:
                 return CommWithReplica_pb2.WriteResponse(status=status.status, uuid=request.uuid, version=status.version)
             else:
@@ -156,10 +156,14 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                         return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE ALREADY DELETED", name=None, content=None, version=None)
                     else:
                         directory = "../Datafile/"+selfDetails["name"] + "/"
-                        with open(directory+Files[uuid][0], "r") as f:
-                            # Write some text to the file
-                            content = f.read()
-                        return CommWithReplica_pb2.ReadResponse(status="SUCCESS", name=Files[uuid][0], content=content, version=Files[uuid][1])
+                        try:
+                            with open(directory+Files[uuid][0], "r") as f:
+                                # Write some text to the file
+                                content = f.read()
+                            return CommWithReplica_pb2.ReadResponse(status="SUCCESS", name=Files[uuid][0], content=content, version=Files[uuid][1])
+                        except:
+                            print("Write not done yet in this replica")
+                            return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
         else:
             return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
         
@@ -171,7 +175,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
             status = stub.ConnectToPRforDelete(CommWithReplica_pb2.DeleteRequest(uuid=request.uuid))
 
-            print("Done deleting in Primary Replica")
+            print("REPLICA: Delete performed in Primary Replica")
 
             return CommWithReplica_pb2.StatusRepReq(status=status.status)
         
@@ -189,7 +193,7 @@ def parallelWrite(replica, request):
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.ConnectToReplicaforWrite(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
-    
+    print("REPLICA: Write performed on " + replica + "\n")
     return status 
 
 def parallelDelete(replica, request, time):
@@ -213,17 +217,19 @@ def PerformWriteOnBackUp(request):
         threadArr[i].start()
 
     for i in range(len(threadArr)):
+        
         results.append(threadArr[i].join())
+       
 
         if 'SUCCESS' in results[i].status:
             count +=1
 
     if count == len(Replicas):
-        print("SUCCESS, ALL REPLICAS UPDATED")
+        print("PRIMARY REPLICA: SUCCESS, Write performed on all replicas\n")
 
     # Then contact final backup 
     else:
-        print("FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
+        print("PRIMARY REPLICA: FAIL, Write couldn't be completed on all replicas\n")
 
 def PerformDeleteOnBackUp(request, time):
     # Contact all replicas and get ack
@@ -243,11 +249,11 @@ def PerformDeleteOnBackUp(request, time):
             count +=1
 
     if count == len(Replicas):
-        print("SUCCESS, ALL REPLICAS UPDATED")
+        print("PRIMARY REPLICA: SUCCESS, Delete performed on all replicas\n")
 
     # Then contact final backup 
     else:
-        print("FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
+        print("PRIMARY REPLICA: FAIL, Delete couldn't be completed on all replicas\n")
 
 def writeInFile(request):
     flag = 1
@@ -298,7 +304,7 @@ def DeleteFile(request):
             if os.path.exists(directory):
                 # Delete the file
                 os.remove(directory)
-                print(f"File {directory} has been deleted.")
+            
 
             Files[request.uuid][0] = ""
             return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
@@ -320,18 +326,17 @@ def connectToRegistry(ip, port):
             PR_details['name'] = status.primaryServerAddress.name
             PR_details['ip'] = status.primaryServerAddress.ip
             PR_details['port'] = status.primaryServerAddress.port
-            print(selfDetails["name"] + " SUCCESSFULLY REGISTERED")
-            print("PR Details ", PR_details)
+            print("REPLICA: " + selfDetails["name"] + " WAS SUCCESSFULLY REGISTERED")
+            print("PR Details : ", PR_details)
+            print("\n")
 
             directory = "../Datafile/"+selfDetails["name"]+"/"
             if not os.path.exists(directory):
                 os.makedirs(directory)
-                print(f"Directory {directory} created successfully.")
-            else:
-                print(f"Directory {directory} already exists.")
+                
 
         else:
-            print(status.status)
+            print("REPLICA: Status for connecting to Registry Server: " + status.status)
 
     
 def ConnectToReplica(ip, port):
