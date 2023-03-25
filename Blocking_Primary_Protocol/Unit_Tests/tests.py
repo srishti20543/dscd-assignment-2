@@ -47,7 +47,6 @@ def stepsForClient2(IP, port):
     server = ["localhost", 5000]
     Client.read(server, unique_id1)
 
-
 def setUp():
     registryServer = Process(target=RegistryServer.startRegistryServer)
     registryServer.start()

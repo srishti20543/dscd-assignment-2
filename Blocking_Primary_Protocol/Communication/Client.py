@@ -36,6 +36,8 @@ def write(server, uuid, fileName, content):
         print("CLIENT: ")
         print("Status for write: " + status.status)
         print("UUID: " + status.uuid)
+        if 'FAIL' in status.status:
+            date = ""
         print("Version: " + str(date) + "\n")
 
 def read(server, uuid):
@@ -49,6 +51,8 @@ def read(server, uuid):
         print("Status: " + status.status)
         print("Name: " + status.name)
         print("Content: " + status.content)
+        if status.name == "":
+            date = ""
         print("Version: " + str(date) + "\n")
 
 def delete(server, uuid):
