@@ -40,6 +40,12 @@ def stepsForClient2(IP, port):
     Client.read(server, unique_id1)
     server = ["localhost", 5002]
     Client.read(server, unique_id1)
+    server = ["localhost", 5003]
+    Client.read(server, unique_id1)
+    server = ["localhost", 5004]
+    Client.read(server, unique_id1)
+    server = ["localhost", 5005]
+    Client.read(server, unique_id1)
     Client.delete(server, unique_id1)
     Client.read(server, unique_id1)
     server = ["localhost", 5001]
@@ -60,6 +66,14 @@ def setUp():
     time.sleep(1)
     server3 = Process(target=stepsForBackupServer, args=("localhost", 5002))
     server3.start()
+    server4 = Process(target=stepsForPrimaryServer, args=("localhost", 5003))
+    server4.start()
+    # time.sleep(1)
+    server5 = Process(target=stepsForBackupServer, args=("localhost", 5004))
+    server5.start()
+    time.sleep(1)
+    server6 = Process(target=stepsForBackupServer, args=("localhost", 5005))
+    server6.start()
     # time.sleep(1)
     # client1 = Process(target=stepsForClient1, args=("localhost", 6000))
     # client1.start()

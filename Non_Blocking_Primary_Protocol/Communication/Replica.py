@@ -175,57 +175,79 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
 
             return CommWithReplica_pb2.StatusRepReq(status=status.status)
         
-        
-
 
 def returnFunctionForThread(status):
     return status
 
 def returnFunctionForThreadForDelete(status):
     return CommWithReplica_pb2.StatusRepReq(status=status)
-
-def PerformDeleteOnBackUp(request, time):
-    # Contact all replicas and get ack
-    count = 0
-
-    for replica in Replicas.keys():
-        serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
-
-        with grpc.insecure_channel(serverAddr) as channel:
-            stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-            status = stub.ConnectToReplicaforDelete(CommWithReplica_pb2.DeleteRequestToReplica(uuid=request.uuid, version=time))
-        
-        if 'SUCCESS' in status.status:
-            count +=1
-
-    if count == len(Replicas):
-        print(status.status)
-
-    # Then contact final backup 
-    else:
-        print("FAIL, DELETE NOT COMPLETED IN ALL REPLICAS")
     
+
+def parallelWrite(replica, request):
+    serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
+
+    with grpc.insecure_channel(serverAddr) as channel:
+        stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+        status = stub.ConnectToReplicaforWrite(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
+    
+    return status 
+
+def parallelDelete(replica, request, time):
+    serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
+
+    with grpc.insecure_channel(serverAddr) as channel:
+        stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+        status = stub.ConnectToReplicaforDelete(CommWithReplica_pb2.DeleteRequestToReplica(uuid=request.uuid, version=time))
+        
+    return status 
 
 
 def PerformWriteOnBackUp(request):
     count = 0
+    threadArr = []
+    results = []
     for replica in Replicas.keys():
-        serverAddr = Replicas[replica][0] + ":" + str(Replicas[replica][1])
+        threadArr.append(ThreadWithReturnValue(target=parallelWrite , args=(replica, request)))
+    
+    for i in range(len(threadArr)):
+        threadArr[i].start()
 
-        with grpc.insecure_channel(serverAddr) as channel:
-            stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
-            status = stub.ConnectToReplicaforWrite(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
-        
-        if 'SUCCESS' in status.status:
+    for i in range(len(threadArr)):
+        results.append(threadArr[i].join())
+
+        if 'SUCCESS' in results[i].status:
             count +=1
 
     if count == len(Replicas):
-        print(status.status + ": ALL REPLICAS UPDATED")
+        print("SUCCESS, ALL REPLICAS UPDATED")
 
     # Then contact final backup 
     else:
         print("FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
 
+def PerformDeleteOnBackUp(request, time):
+    # Contact all replicas and get ack
+    count = 0
+    threadArr = []
+    results = []
+    for replica in Replicas.keys():
+        threadArr.append(ThreadWithReturnValue(target=parallelDelete , args=(replica, request, time)))
+    
+    for i in range(len(threadArr)):
+        threadArr[i].start()
+
+    for i in range(len(threadArr)):
+        results.append(threadArr[i].join())
+
+        if 'SUCCESS' in results[i].status:
+            count +=1
+
+    if count == len(Replicas):
+        print("SUCCESS, ALL REPLICAS UPDATED")
+
+    # Then contact final backup 
+    else:
+        print("FAIL, WRITE NOT COMPLETED IN ALL REPLICAS")
 
 def writeInFile(request):
     flag = 1
