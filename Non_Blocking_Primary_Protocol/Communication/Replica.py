@@ -162,7 +162,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                                 content = f.read()
                             return CommWithReplica_pb2.ReadResponse(status="SUCCESS", name=Files[uuid][0], content=content, version=Files[uuid][1])
                         except:
-                            print("Write not done yet in this replica")
+                            print("Write/Delete not completed yet at this replica, call read function again!\n")
                             return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
         else:
             return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE DOESNOT EXIST", name=None, content=None, version=None)
@@ -193,7 +193,6 @@ def parallelWrite(replica, request):
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.ConnectToReplicaforWrite(CommWithReplica_pb2.Request(uuid=request.uuid, name=request.name, content=request.content, version=Files[request.uuid][1]))
-    print("REPLICA: Write performed on " + replica + "\n")
     return status 
 
 def parallelDelete(replica, request, time):
