@@ -10,6 +10,9 @@ from multiprocessing import Process
 import time
 import unittest
 
+
+
+
 def stepsForPrimaryServer(IP, port):
     Replica.connectToRegistry(IP, port)
     Replica.ConnectToReplica(IP, port)
@@ -49,6 +52,7 @@ def stepsForClient2(IP, port):
     server = ["localhost", 5005]
     Client.read(server, unique_id1)
     Client.delete(server, unique_id1)
+
     # time.sleep(3)
     Client.read(server, unique_id1)
     server = ["localhost", 5001]
@@ -81,10 +85,21 @@ def setUp():
     # client1 = Process(target=stepsForClient1, args=("localhost", 6000))
     # client1.start()
     time.sleep(1)
-    client2 = Process(target=stepsForClient2, args=("localhost", 7000))
+    t = Testing()
+    client2 = Process(target=t.test_client, args=("localhost", 7000))
     client2.start()
   
-    
+class Testing(unittest.TestCase):
 
+    def test_client(self, IP, port):
+        Client.runRegistryServer(IP, port)
+        server = ["localhost", 5001]
+        unique_id1 = str(uuid.uuid1())
+        fileName = "file1.txt"
+        content = "coding in file1"
+        self.assertEqual(Client.write(server, unique_id1, fileName, content), ["SUCCESS", unique_id1, any()])
+
+
+    
 if __name__ == '__main__':
     setUp()

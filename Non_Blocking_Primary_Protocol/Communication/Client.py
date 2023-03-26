@@ -39,6 +39,7 @@ def write(server, uuid, fileName, content):
         if 'FAIL' in status.status:
             date = ""
         print("Version: " + str(date) + "\n")
+    return [status.status, status.uuid, str(date)]
 
 def read(server, uuid):
     serverAddr = server[0]+":"+str(server[1])
@@ -54,6 +55,7 @@ def read(server, uuid):
         if status.name == "":
             date = ""
         print("Version: " + str(date) + "\n")
+    return [status.status, status.name, status.content, str(date)]
 
 def delete(server, uuid):
     serverAddr = server[0]+":"+str(server[1])
@@ -61,6 +63,8 @@ def delete(server, uuid):
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.Delete(CommWithReplica_pb2.DeleteRequest(uuid=uuid))
         print("CLIENT: \nStatus for delete: " + status.status + "\n")
+    
+    return status.status
 
 if __name__ == '__main__':
     pass
