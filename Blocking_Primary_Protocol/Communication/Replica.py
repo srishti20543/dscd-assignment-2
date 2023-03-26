@@ -196,6 +196,8 @@ def writeInFile(request):
         else:
             return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE WITH THE SAME NAME ALREADY EXISTS")
     else:
+        flag = 1
+        
         for uuid in Files.keys():
             if Files[uuid][0] == request.name:
                 flag = 0
@@ -209,13 +211,16 @@ def writeInFile(request):
                 f.write(request.content)
             return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
         else:
-            return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            if Files[request.uuid][0] == "":
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            else:
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, CANNOT HAVE TWO DIFFERENT FILES WITH SAME UUID")
 
 
 def DeleteFile(request):
     flag = 0
     if request.uuid not in Files.keys():
-        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXISTS")
+        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXIST")
     else:
         if request.uuid in Files.keys():
             if Files[request.uuid][0] == "":

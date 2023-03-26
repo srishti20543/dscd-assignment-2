@@ -117,11 +117,12 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
                 time = Timestamp(seconds=int(timestamp))
                 Files[request.uuid][1] = time
 
+    
         status = DeleteFile(request)
-        updateTime = Files[request.uuid][1]
+        
 
         if "SUCCESS" in status.status:
-
+            updateTime = Files[request.uuid][1]
             retThread = ThreadWithReturnValue(target=returnFunctionForThreadForDelete, args=(status.status,))
             retThread.start()
             result = retThread.join()
@@ -173,8 +174,9 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
         serverAddr = PR_details["ip"] + ":" + str(PR_details["port"])
         with grpc.insecure_channel(serverAddr) as channel:
             stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
+          
             status = stub.ConnectToPRforDelete(CommWithReplica_pb2.DeleteRequest(uuid=request.uuid))
-
+ 
             print("REPLICA: Delete performed in Primary Replica")
 
             return CommWithReplica_pb2.StatusRepReq(status=status.status)
@@ -285,13 +287,17 @@ def writeInFile(request):
                 f.write(request.content)
             return CommWithReplica_pb2.StatusRepReqWithVersion(status="SUCCESS", version=Files[request.uuid][1]) 
         else:
-            return CommWithReplica_pb2.StatusRepReqWithVersion(status="FAIL, DELETED FILE CANNOT BE UPDATED", version=None)
+            if Files[request.uuid][0] == "":
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            else:
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, CANNOT HAVE TWO DIFFERENT FILES WITH SAME UUID")
 
 
 def DeleteFile(request):
     flag = 0
     if request.uuid not in Files.keys():
-        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXISTS")
+      
+        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXIST")
     else:
         if request.uuid in Files.keys():
             if Files[request.uuid][0] == "":

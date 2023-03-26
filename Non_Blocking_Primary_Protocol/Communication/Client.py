@@ -39,7 +39,7 @@ def write(server, uuid, fileName, content):
         if 'FAIL' in status.status:
             date = ""
         print("Version: " + str(date) + "\n")
-    return [status.status, status.uuid, str(date)]
+    return [status.status, status.uuid]
 
 def read(server, uuid):
     serverAddr = server[0]+":"+str(server[1])
@@ -55,9 +55,10 @@ def read(server, uuid):
         if status.name == "":
             date = ""
         print("Version: " + str(date) + "\n")
-    return [status.status, status.name, status.content, str(date)]
+    return [status.status, status.name, status.content]
 
 def delete(server, uuid):
+
     serverAddr = server[0]+":"+str(server[1])
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)

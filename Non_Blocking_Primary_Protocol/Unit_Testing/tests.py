@@ -10,9 +10,6 @@ from multiprocessing import Process
 import time
 import unittest
 
-
-
-
 def stepsForPrimaryServer(IP, port):
     Replica.connectToRegistry(IP, port)
     Replica.ConnectToReplica(IP, port)
@@ -23,42 +20,6 @@ def stepsForBackupServer(IP, port):
 
 def stepsForClient1(IP, port):
     Client.runRegistryServer(IP, port)
-
-def stepsForClient2(IP, port):
-    Client.runRegistryServer(IP, port)
-    server = ["localhost", 5001]
-    unique_id1 = str(uuid.uuid1())
-    fileName = "file1.txt"
-    content = "coding in file1"
-    Client.write(server, unique_id1, fileName, content)
-    server = ["localhost", 5005]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5003]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5000]
-    Client.read(server, unique_id1)
-    content = "coding in file1 again"
-    Client.write(server, unique_id1, fileName, content)
-    # time.sleep(3)
-    Client.read(server, unique_id1)
-    server = ["localhost", 5001]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5002]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5003]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5004]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5005]
-    Client.read(server, unique_id1)
-    Client.delete(server, unique_id1)
-
-    # time.sleep(3)
-    Client.read(server, unique_id1)
-    server = ["localhost", 5001]
-    Client.read(server, unique_id1)
-    server = ["localhost", 5000]
-    Client.read(server, unique_id1)
 
 
 def setUp():
@@ -73,33 +34,57 @@ def setUp():
     time.sleep(1)
     server3 = Process(target=stepsForBackupServer, args=("localhost", 5002))
     server3.start()
-    server4 = Process(target=stepsForPrimaryServer, args=("localhost", 5003))
-    server4.start()
-    # time.sleep(1)
-    server5 = Process(target=stepsForBackupServer, args=("localhost", 5004))
-    server5.start()
     time.sleep(1)
-    server6 = Process(target=stepsForBackupServer, args=("localhost", 5005))
-    server6.start()
-    # time.sleep(1)
-    # client1 = Process(target=stepsForClient1, args=("localhost", 6000))
-    # client1.start()
-    time.sleep(1)
-    t = Testing()
-    client2 = Process(target=t.test_client, args=("localhost", 7000))
-    client2.start()
   
 class Testing(unittest.TestCase):
 
-    def test_client(self, IP, port):
-        Client.runRegistryServer(IP, port)
+    def test_case(self):
+        setUp()
+        Client.runRegistryServer("localhost", 7000)
         server = ["localhost", 5001]
         unique_id1 = str(uuid.uuid1())
         fileName = "file1.txt"
         content = "coding in file1"
-        self.assertEqual(Client.write(server, unique_id1, fileName, content), ["SUCCESS", unique_id1, any()])
+        unique_id2 = str(uuid.uuid1())
 
+        self.assertEqual(Client.write(server, unique_id1, fileName, content), ["SUCCESS", unique_id1])
+        self.assertEqual(Client.write(server, unique_id2, fileName, content), ["FAIL, FILE WITH THE SAME NAME ALREADY EXISTS", ""])
+        self.assertEqual(Client.write(server, unique_id1, "abc.txt", content), ["FAIL, CANNOT HAVE TWO DIFFERENT FILES WITH SAME UUID", ""])
 
-    
-if __name__ == '__main__':
-    setUp()
+        server = ["localhost", 5000]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1"])
+        server = ["localhost", 5001]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1"])
+        server = ["localhost", 5002]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1"])
+
+        content = "coding in file1 again"
+        self.assertEqual(Client.write(server, unique_id1, fileName, content), ["SUCCESS", unique_id1])
+
+        server = ["localhost", 5000]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1 again"])
+        server = ["localhost", 5001]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1 again"])
+        server = ["localhost", 5002]
+        self.assertEqual(Client.read(server, unique_id1), ["SUCCESS", "file1.txt", "coding in file1 again"])
+
+        self.assertEqual(Client.delete(server, unique_id1), "SUCCESS")
+
+        server = ["localhost", 5000]
+        self.assertEqual(Client.read(server, unique_id1), ["FAIL, FILE ALREADY DELETED", "", ""])
+        server = ["localhost", 5001]
+        self.assertEqual(Client.read(server, unique_id1), ["FAIL, FILE ALREADY DELETED","", ""])
+        server = ["localhost", 5002]
+        self.assertEqual(Client.read(server, unique_id1), ["FAIL, FILE ALREADY DELETED", "", ""])
+
+        unique_id3 = str(uuid.uuid1())
+        self.assertEqual(Client.read(server, unique_id3), ["FAIL, FILE DOESNOT EXIST", "", ""])
+
+        self.assertEqual(Client.write(server, unique_id1, fileName, content), ["FAIL, DELETED FILE CANNOT BE UPDATED", ""])
+
+        self.assertEqual(Client.delete(server, unique_id3), "FAIL, FILE DOES NOT EXIST")
+
+        self.assertEqual(Client.delete(server, unique_id1), "FAIL, FILE ALREADY DELETED")
+
+        
+
