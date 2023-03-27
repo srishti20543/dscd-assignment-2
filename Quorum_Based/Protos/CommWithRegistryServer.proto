@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "CommWithReplica.proto";
+
+service CommWithRegistryServer {
+  rpc Register (Address) returns (RegisterReplicaResponse) {}
+  rpc getCompleteReplicaList (Address) returns (stream ReplicaListResponse) {}
+  rpc getReadReplicaList (Address) returns (stream ReplicaListResponse) {}
+  rpc getWriteReplicaList (Address) returns (stream ReplicaListResponse) {}
+  rpc getQuorumParams (Address) returns (QuorumParams) {}
+}
+
+message RegisterReplicaResponse {
+  string status = 1;
+  string selfName = 2;
+}
+
+message ClientAddress {
+  string ip = 1;
+  int32 port = 2;
+}
+
+message ReplicaListResponse {
+  Address replicaServer = 1;
+}
+
+message QuorumParams {
+  int32 totalReplicas = 1;
+  int32 numReads = 2;
+  int32 numWrites = 3;
+}

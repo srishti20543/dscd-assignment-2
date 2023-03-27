@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+service CommWithReplica{
+
+    rpc Write(WriteRequest) returns (WriteResponse) {}
+    rpc Read(ReadRequest) returns (ReadResponse) {}
+    rpc Delete(DeleteRequest) returns (StatusRepReq) {}
+
+}
+
+message WriteRequest{
+    string uuid = 1;
+    string name = 2;
+    string content = 3;
+}
+
+message ReadRequest{
+    string uuid = 1;
+}
+
+message DeleteRequest{
+    string uuid = 1;
+}
+
+
+message WriteResponse{
+    string status = 1;
+    string uuid = 2;
+    google.protobuf.Timestamp version = 3;
+}
+
+message ReadResponse{
+    string status = 1;
+    string name = 2;
+    string content = 3;
+    google.protobuf.Timestamp version = 4;
+}
+
+message StatusRepReq{
+    string status = 1;
+}
+
+message Address{
+    string name = 1;
+    string ip = 2;
+    int32 port = 3;
+}
