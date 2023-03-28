@@ -62,7 +62,7 @@ class CommWithReplicaServicer(CommWithReplica_pb2_grpc.CommWithReplicaServicer):
             for uuid in Files.keys():
                 if uuid == request.uuid:
                     if Files[uuid][0] == "":
-                        return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE ALREADY DELETED", name=None, content=None, version=None)
+                        return CommWithReplica_pb2.ReadResponse(status="FAIL, FILE ALREADY DELETED", name=None, content=None, version=Files[request.uuid][1])
                     else:
                         directory = "../Datafile/"+selfDetails["name"] + "/"
                         with open(directory+Files[uuid][0], "r") as f:
@@ -122,14 +122,24 @@ def writeInFile(request):
                 f.write(request.content)
             return CommWithReplica_pb2.StatusRepReq(status="SUCCESS") 
         else:
-            return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            if Files[request.uuid][0] == "":
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, DELETED FILE CANNOT BE UPDATED")
+            else:
+                return CommWithReplica_pb2.StatusRepReq(status="FAIL, CANNOT HAVE TWO DIFFERENT FILES WITH SAME UUID")
 
 
 def DeleteFile(request):
     flag = 0
     if request.uuid not in Files.keys():
-        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXISTS")
+        # File was NOT in map
+        ct = datetime.datetime.now()
+        timestamp = ct.timestamp()
+        time = Timestamp(seconds=int(timestamp))
+        Files[request.uuid] = ["", time]
+
+        return CommWithReplica_pb2.StatusRepReq(status="FAIL, FILE DOES NOT EXIST, BUT ADDED EMPTY FILE TO MAP")
     else:
+        # File found in map
         if request.uuid in Files.keys():
             if Files[request.uuid][0] == "":
                     flag = 1

@@ -60,7 +60,7 @@ def read(uuid):
         print("Status: " + latest.status)
         print("Name: " + latest.name)
         print("Content: " + latest.content)
-        if latest.name == "":
+        if latest.name == "" and latest.status != "FAIL, FILE ALREADY DELETED":
             date = ""
         print("Version: " + str(date) + "\n")
         return latest
@@ -71,20 +71,31 @@ def read_single(server, uuid):
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.Read(CommWithReplica_pb2.ReadRequest(uuid=uuid))
 
+        time = status.version
+        date = datetime.fromtimestamp(time.seconds)
+        print("REPLICA Server Address:", serverAddr)
+        print("Status: " + status.status)
+        print("Name: " + status.name)
+        print("Content: " + status.content)
+        if status.name == "" and status.status != "FAIL, FILE ALREADY DELETED":
+            date = ""
+        print("Version: " + str(date) + "\n")
+
         return status
 
 
 
 def write(uuid, fileName, content):
     global myIP, myPort
-
+    statusList = []
     with grpc.insecure_channel('localhost:8888') as channel:
         stub = CommWithRegistryServer_pb2_grpc.CommWithRegistryServerStub(channel)
         request = CommWithReplica_pb2.Address(name=None, ip=myIP, port=myPort)
         status = getListOfWriteServers(stub, request)
         for x in status:
             server = [x.replicaServer.ip, x.replicaServer.port]
-            write_single(server, uuid, fileName, content)
+            statusList.append(write_single(server, uuid, fileName, content))
+    return statusList
 
 def write_single(server, uuid, fileName, content):
     serverAddr = server[0]+":"+str(server[1])
@@ -99,6 +110,7 @@ def write_single(server, uuid, fileName, content):
         if 'FAIL' in status.status:
             date = ""
         print("Version: " + str(date) + "\n")
+        return [status.status, status.uuid]
 
 def delete(uuid):
     global myIP, myPort
@@ -118,7 +130,7 @@ def delete_single(server, uuid):
     with grpc.insecure_channel(serverAddr) as channel:
         stub = CommWithReplica_pb2_grpc.CommWithReplicaStub(channel)
         status = stub.Delete(CommWithReplica_pb2.DeleteRequest(uuid=uuid))
-        print("CLIENT: \nStatus for delete to server: " + serverAddr + "is" + status.status + "\n")
+        print("CLIENT: \nStatus for delete to server: " + serverAddr + " is " + status.status + "\n")
         
 
 if __name__ == '__main__':
